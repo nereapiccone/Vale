@@ -1,0 +1,97 @@
+package com.map;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class jm_i030_convert_to_json {
+	public static void main(String args[]) throws JSONException {
+
+		List<String> xml = new ArrayList<String>();
+		List<String> table = new ArrayList<String>();
+		List<String> tags = new ArrayList<String>();
+		
+		tags.add("kunnr");
+		tags.add("response_code");
+		table.add("despachos");
+		table.add("name");
+		table.add("matnr");
+		table.add("c_origen");
+		table.add("c_destino");
+		table.add("nro_despacho");
+		table.add("nro_op");
+		table.add("cp");
+		table.add("vagon");
+		table.add("bstdk");
+		table.add("ntgew");
+		table.add("vrkme");
+		table.add("kwmeng");
+		table.add("kbetr");
+		table.add("un_kbetr");
+		table.add("kwert");
+		table.add("un_kwert");
+		table.add("linea");
+					
+		xml.add("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
+				"<ns0:MT_I030_GETPEND_RESP xmlns:ns0=\"urn:XXX:ecc:i030\">\r\n" + 
+				"   <kunnr>23123</kunnr>\r\n" + 
+				"   <response_code>00</response_code>\r\n" + 
+				"   <despachos>\r\n" + 
+				"      <name>Nombre test</name>\r\n" + 
+				"      <matnr>Este es un material</matnr>\r\n" + 
+				"      <c_origen>Centro origen</c_origen>\r\n" + 
+				"      <c_destino>Centro destino</c_destino>\r\n" + 
+				"      <nro_despacho>45345</nro_despacho>\r\n" + 
+				"      <nro_op>A2345</nro_op>\r\n" + 
+				"      <cp>34324</cp>\r\n" + 
+				"      <vagon>VA4354</vagon>\r\n" + 
+				"      <bstdk>3234jlkj</bstdk>\r\n" + 
+				"      <ntgew>4</ntgew>\r\n" + 
+				"      <vrkme>3</vrkme>\r\n" + 
+				"      <kwmeng>2</kwmeng>\r\n" + 
+				"      <kbetr>45</kbetr>\r\n" + 
+				"      <un_kbetr>A</un_kbetr>\r\n" + 
+				"      <kwert>4</kwert>\r\n" + 
+				"      <un_kwert>ARS</un_kwert>\r\n" + 
+				"      <linea>LU<linea>\r\n" + 
+				"   </despachos>\r\n" + 
+				"</ns0:MT_I030_GETPEND_RESP>");
+		
+		
+		JSONArray ja = new JSONArray();
+		JSONObject mainObj = new JSONObject();
+		
+		for (String line : xml) {
+			for (String retval : line.split("<despachos>", 0)) {
+				JSONObject obj = new JSONObject();
+				if (retval != null) {
+					for (String tag: tags) {
+						if (retval.contains("<" + tag + ">")) {
+							String result1 = retval.split("<" + tag + ">")[1].split("</" + tag + ">")[0];
+							mainObj.put(tag, result1);
+						} else if (retval.contains("<" + tag + "/>")) {
+							mainObj.put(tag, " ");
+						}
+					}
+					for (String tag : table) {
+						if (retval.contains("<" + tag + ">")) {
+							String result1 = retval.split("<" + tag + ">")[1].split("</" + tag + ">")[0];
+							obj.put(tag, result1);
+						} else if (retval.contains("<" + tag + "/>")) {
+							obj.put(tag, " ");
+						}
+					}
+					if (obj.length() != 0)  
+						ja.put(obj);
+				}
+			}
+		}
+
+		mainObj.put("despachos", ja);
+		System.out.println(mainObj);
+		
+	}
+}
