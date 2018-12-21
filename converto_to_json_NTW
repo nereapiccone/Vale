@@ -1,0 +1,68 @@
+package com.map; 
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONObject;
+
+import com.sap.aii.mapping.api.AbstractTransformation;
+import com.sap.aii.mapping.api.StreamTransformationException;
+import com.sap.aii.mapping.api.TransformationInput;
+import com.sap.aii.mapping.api.TransformationOutput;
+
+public class I034_Convert_to_json extends AbstractTransformation {
+	@Override
+	public void transform(TransformationInput transformationInput,
+			TransformationOutput transformationOutput)
+			throws StreamTransformationException {
+			
+		try {
+			InputStream inputstream = transformationInput.getInputPayload()
+					.getInputStream();
+			OutputStream outputstream = transformationOutput.getOutputPayload()
+					.getOutputStream();
+
+			byte[] b = new byte[inputstream.available()];
+			inputstream.read(b);
+
+			List<String> xml = new ArrayList<String>();
+			List<String> tags = new ArrayList<String>();
+			
+			tags.add("token");
+			tags.add("linea");
+			tags.add("fecha");
+			tags.add("legajo");
+			tags.add("solicitante");
+			tags.add("cant_registros");
+						
+			xml.add(new String(b, "UTF-8"));			
+			
+			for (String line : xml) {
+				for (String retval : line.split("<table>", 0)) {
+					JSONObject obj = new JSONObject();
+					if (retval != null) {
+						for (String tag : tags) {
+							if (retval.contains("<" + tag + ">")) {
+								String result1 = retval.split("<" + tag + ">")[1].split("</" + tag + ">")[0];								
+								if (tag == "token"){									
+									tag = "Token-BCYL";
+									obj.put(tag, result1);
+								}else{
+									obj.put(tag.toUpperCase(), result1);	
+								}
+							} else if (retval.contains("<" + tag + "/>")) {
+								obj.put(tag.toUpperCase(), " ");
+							}
+						}											     
+						outputstream.write(obj.toString().getBytes());
+					}
+				}
+			}							
+		} catch (Exception exception) {
+			getTrace().addDebugMessage(exception.getMessage());
+			throw new StreamTransformationException(exception.toString());
+		}
+	}
+}
