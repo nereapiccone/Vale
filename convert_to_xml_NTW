@@ -31,7 +31,7 @@ public class I034_Convert_to_xml extends AbstractTransformation {
 			String originalresponse = new String(b, "UTF-8");
 			
 			outputstream.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n".getBytes());
-			outputstream.write("<ns1:MT_I034_GET_CONCEPTOS_RESP xmlns:ns1=\"urn:belgranocargas:ecc:i034\">\r\n".getBytes());
+			outputstream.write("<ns1:MT_I034_GET_CONCEPTOS_RESP xmlns:ns1=\"urn:XXX:ecc:i034\">\r\n".getBytes());
 		
 			JsonParser parser = new JsonParser();
 			JsonElement jsonTree = parser.parse(originalresponse);
