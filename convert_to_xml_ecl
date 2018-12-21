@@ -1,0 +1,65 @@
+package jm_i027_convert_to_xml;
+
+import java.util.List;
+import java.util.Vector;
+
+import org.json.JSONException;
+
+public class Conversion {
+	
+	public static void main(String args[]) throws JSONException {
+	
+		String originalresponse = "{\"codeError\":\"0\",\"mensaje\":\"OK\"}";
+				
+		List<String> list = new Vector<String>();
+		for(int i = 0; i < 9; i++ ) {
+			list.add(i, "");
+		}
+						
+		String[] parts = originalresponse.split(",");
+				
+		String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n";
+		String subheader = "<ns1:MT_I016_SYNC_CONTRATO_RESP xmlns:ns1=\"urn:belgranocargas:ecc:i016\">\r\n";
+		String txt_mensaje_ini = "<mensaje>";	
+		String txt_mensaje_fin = "</mensaje>";	
+		String txt_errorCode_ini = "<errorCode>";
+		String txt_errorCode_fin = "</errorCode>";
+		String endheader = "</ns1:MT_I016_SYNC_CONTRATO_RESP>";
+		
+		list.set(0,header);
+		list.set(1,subheader);
+		
+		for (String part : parts) {			
+			
+			if (part.indexOf("mensaje") != -1 ) {
+				list.set(2,txt_mensaje_ini);				
+				String[] response_code = part.split("mensaje");
+				response_code[1] = response_code[1].replace("\"", "");
+				response_code[1] = response_code[1].replace("{", "");
+				response_code[1] = response_code[1].replace(":", "");
+				response_code[1] = response_code[1].replace("}", "");
+				list.set(3,response_code[1]);
+				list.set(4,txt_mensaje_fin);
+			}
+			
+			if (part.indexOf("codeError") != -1 ) {			
+				list.set(5,txt_errorCode_ini);
+				String[] response_message = part.split(":");
+				response_message[1] = response_message[1].replace("\"", "");
+				response_message[1] = response_message[1].replace("{", "");
+				response_message[1] = response_message[1].replace("}", "");
+				list.set(6,response_message[1]);	
+				list.set(7,txt_errorCode_fin);
+			}
+		}
+		
+		list.set(8,endheader);
+		String finalresponse = "";
+		for ( String l: list ) {
+			finalresponse = finalresponse + l;	
+		}			
+		
+		System.out.println(finalresponse);
+	}
+
+}
