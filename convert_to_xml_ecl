@@ -19,7 +19,7 @@ public class Conversion {
 		String[] parts = originalresponse.split(",");
 				
 		String header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n";
-		String subheader = "<ns1:MT_I016_SYNC_CONTRATO_RESP xmlns:ns1=\"urn:belgranocargas:ecc:i016\">\r\n";
+		String subheader = "<ns1:MT_I016_SYNC_CONTRATO_RESP xmlns:ns1=\"urn:XXX:ecc:i016\">\r\n";
 		String txt_mensaje_ini = "<mensaje>";	
 		String txt_mensaje_fin = "</mensaje>";	
 		String txt_errorCode_ini = "<errorCode>";
