@@ -1,0 +1,137 @@
+package com.map;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.sap.aii.mapping.api.AbstractTransformation;
+import com.sap.aii.mapping.api.StreamTransformationException;
+import com.sap.aii.mapping.api.TransformationInput;
+import com.sap.aii.mapping.api.TransformationOutput;
+
+public class I034_Convert_to_xml extends AbstractTransformation {
+	@Override
+	public void transform(TransformationInput transformationInput,
+			TransformationOutput transformationOutput)
+			throws StreamTransformationException {
+		try {
+
+			InputStream inputstream = transformationInput.getInputPayload()
+					.getInputStream();
+			OutputStream outputstream = transformationOutput.getOutputPayload()
+					.getOutputStream();
+			
+			// Copy Input content to Output content
+			byte[] b = new byte[inputstream.available()];
+			inputstream.read(b);
+		
+			String originalresponse = new String(b, "UTF-8");
+			
+			outputstream.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n".getBytes());
+			outputstream.write("<ns1:MT_I034_GET_CONCEPTOS_RESP xmlns:ns1=\"urn:belgranocargas:ecc:i034\">\r\n".getBytes());
+		
+			JsonParser parser = new JsonParser();
+			JsonElement jsonTree = parser.parse(originalresponse);
+			
+			if (jsonTree.isJsonObject()) {
+				JsonObject jsonObject = jsonTree.getAsJsonObject();
+				outputstream.write("<cant_registros>".getBytes());
+			
+				String cant_registros_ = jsonObject.get("CANT_REGISTROS").getAsString();
+				outputstream.write(cant_registros_.getBytes());
+				
+				outputstream.write("</cant_registros>".getBytes());
+			
+				JsonElement datos = jsonObject.get("DATOS");
+		        JsonArray datos_ = datos.getAsJsonArray();
+		        for (int i = 0; i < datos_.size(); i++) {
+		        	outputstream.write("<datos>".getBytes());
+		        	
+					JsonElement lista = datos_.get(i);
+					JsonObject lst = lista.getAsJsonObject();
+					outputstream.write("<categoria>".getBytes());
+					String categoria_ = lst.get("CATEGORIA").getAsString();
+					outputstream.write(categoria_.getBytes());					
+					outputstream.write("</categoria>".getBytes());		
+					
+					outputstream.write("<concepto>".getBytes());
+					String concepto_ = lst.get("CONCEPTO").getAsString();
+					outputstream.write(concepto_.getBytes());
+					outputstream.write("</concepto>".getBytes());
+					
+					outputstream.write("<error>".getBytes());
+					String error_i = "null";
+					if (!lst.get("ERROR").isJsonNull()){
+						error_i = lst.get("ERROR").getAsString();
+					}
+					outputstream.write(error_i.getBytes());
+					outputstream.write("</error>".getBytes());
+					
+					outputstream.write("<fecha>".getBytes());
+					String fecha_i = lst.get("FECHA").getAsString();
+					outputstream.write(fecha_i.getBytes());
+					outputstream.write("</fecha>".getBytes());
+					
+					outputstream.write("<id>".getBytes());
+					String id_ = lst.get("ID").getAsString();
+					outputstream.write(id_.getBytes());
+					outputstream.write("</id>".getBytes());
+					
+					outputstream.write("<legajo>".getBytes());
+					String legajo_ = lst.get("LEGAJO").getAsString();
+					outputstream.write(legajo_.getBytes());
+					outputstream.write("</legajo>".getBytes());
+					
+					outputstream.write("<operacion>".getBytes());
+					String operacion_ = lst.get("OPERACION").getAsString();
+					outputstream.write(operacion_.getBytes());
+					outputstream.write("</operacion>".getBytes());
+
+					outputstream.write("<valor>".getBytes());
+					String valor_ = lst.get("VALOR").getAsString();
+					outputstream.write(valor_.getBytes());
+					outputstream.write("</valor>".getBytes());
+				
+					outputstream.write("</datos>".getBytes());
+		        }
+		        
+		        outputstream.write("<error>".getBytes());
+		        String error_ = "null";
+		        if (!jsonObject.get("ERROR").isJsonNull()){
+		        	error_ = jsonObject.get("ERROR").getAsString();
+		        }
+		        outputstream.write(error_.getBytes());
+		        outputstream.write("</error>".getBytes());
+				
+				outputstream.write("<fecha>".getBytes());
+		        String fecha_ = jsonObject.get("FECHA").getAsString();
+		        outputstream.write(fecha_.getBytes());
+		        outputstream.write("</fecha>".getBytes());
+				
+				outputstream.write("<id_cierre>".getBytes());
+		        String id_cierre_ = jsonObject.get("ID_CIERRE").getAsString();
+		        outputstream.write(id_cierre_.getBytes());
+		        outputstream.write("</id_cierre>".getBytes());
+			        
+				outputstream.write("<linea>".getBytes());
+		        String linea_ = jsonObject.get("LINEA").getAsString();
+		        outputstream.write(linea_.getBytes());
+		        outputstream.write("</linea>".getBytes());
+			
+				outputstream.write("<solicitante>".getBytes());
+		        String solicitante = jsonObject.get("SOLICITANTE").getAsString();
+		        outputstream.write(solicitante.getBytes());
+		        outputstream.write("</solicitante>".getBytes());
+				
+		        outputstream.write("</ns1:MT_I034_GET_CONCEPTOS_RESP>".getBytes());
+			}
+							
+		} catch (Exception exception) {
+			getTrace().addDebugMessage(exception.getMessage());
+			throw new StreamTransformationException(exception.toString());
+		}
+	}
+}
