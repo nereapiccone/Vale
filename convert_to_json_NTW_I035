@@ -1,0 +1,110 @@
+package com.map; 
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.sap.aii.mapping.api.AbstractTransformation;
+import com.sap.aii.mapping.api.StreamTransformationException;
+import com.sap.aii.mapping.api.TransformationInput;
+import com.sap.aii.mapping.api.TransformationOutput;
+
+public class I035_Convert_to_json extends AbstractTransformation {
+	@Override
+	public void transform(TransformationInput transformationInput,
+			TransformationOutput transformationOutput)
+			throws StreamTransformationException {
+			
+		try {
+			InputStream inputstream = transformationInput.getInputPayload()
+					.getInputStream();
+			OutputStream outputstream = transformationOutput.getOutputPayload()
+					.getOutputStream();
+
+			byte[] b = new byte[inputstream.available()];
+			
+			inputstream.read(b);
+			List<String> xml = new ArrayList<String>();
+			List<String> tags = new ArrayList<String>();
+			List<String> tags1 = new ArrayList<String>();
+			tags1.add("token");
+			tags1.add("linea");
+			tags1.add("fecha_h");
+			tags1.add("id_cierre");
+			tags1.add("solicitante");
+			tags1.add("cant_registros");
+			tags1.add("error_h");
+
+			tags.add("id");
+			tags.add("legajo");
+			tags.add("categoria");
+			tags.add("fecha_i");
+			tags.add("operacion");
+			tags.add("error_i");
+			tags.add("concepto");
+			tags.add("valor");	
+			
+			JSONArray ja = new JSONArray();
+			JSONObject mainObj = new JSONObject();
+			xml.add(new String(b, "UTF-8"));	
+
+			for (String line : xml) {
+				
+				for (String retval : line.split("<datos>", 0)) {
+					JSONObject obj = new JSONObject();				
+					if (retval != null) {
+						for (String tag : tags1) {
+							if (retval.contains("<" + tag + ">")) {
+								String result1 = retval.split("<" + tag + ">")[1].split("</" + tag + ">")[0];
+								if (tag == "fecha_h") {
+									tag = "fecha";
+									mainObj.put(tag.toUpperCase(), result1);
+								}else if ( tag == "error_h") {
+									tag = "error";
+									mainObj.put(tag.toUpperCase(), result1);
+								}else if (tag == "token"){
+									tag = "Token-BCYL";
+									mainObj.put(tag, result1);
+								}else{
+									mainObj.put(tag.toUpperCase(), result1);
+								}
+							} else if (retval.contains("<" + tag + "/>")) {
+								mainObj.put(tag.toUpperCase(), " ");
+							}
+						}
+						
+						for (String tag : tags) {
+							if (retval.contains("<" + tag + ">")) {
+								String result1 = retval.split("<" + tag + ">")[1].split("</" + tag + ">")[0];
+								if (tag == "fecha_i") {
+									tag = "fecha";
+								}else if ( tag == "error_i") {
+									tag = "error";
+								}
+								obj.put(tag.toUpperCase(), result1);
+							} else if (retval.contains("<" + tag + "/>")) {
+								obj.put(tag.toUpperCase(), " ");
+							}
+						}
+											
+						if (obj.length() != 0)  {
+							ja.put(obj);						
+						}
+						
+					}
+				}
+			}
+
+			mainObj.put("DATOS", ja);			
+			outputstream.write(mainObj.toString().getBytes());
+			
+		} catch (Exception exception) {
+			getTrace().addDebugMessage(exception.getMessage());
+			throw new StreamTransformationException(exception.toString());
+		}
+	}
+}
